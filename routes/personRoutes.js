@@ -1,22 +1,8 @@
 const router = require('express').Router();
 const Person = require('../models/Person');
-const jwt = require('jsonwebtoken');
+const Utils = require('../utils');
 
-function checkToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ error: 'Parado ai chefia, acesso negado!' });
-    }
-    try {
-        const secret = process.env.SECRET;
-        jwt.verify(token, secret);
-        next();
-    } catch (error) {
-        return res.status(400).json({ error: 'Token inválido' });
-    }
-}
-router.post('/', checkToken, async (req, res) => {
+router.post('/', Utils.checkToken, async (req, res) => {
     const { name, avatar, job, github, linkedin, description } = req.body;
     if (!name) {
         res.status(422).json({ error: 'O nome é obrigatório' });
@@ -62,7 +48,7 @@ router.post('/', checkToken, async (req, res) => {
     }
 });
 
-router.get('/', checkToken, async (req, res) => {
+router.get('/', Utils.checkToken, async (req, res) => {
     try {
         const persons = await Person.find();
         res.status(200).json(persons);
@@ -71,7 +57,7 @@ router.get('/', checkToken, async (req, res) => {
     }
 });
 
-router.get('/:id', checkToken, async (req, res) => {
+router.get('/:id', Utils.checkToken, async (req, res) => {
     const id = req.params.id;
     try {
         const person = await Person.findOne({ _id: id });
@@ -85,7 +71,7 @@ router.get('/:id', checkToken, async (req, res) => {
     }
 });
 
-router.patch('/:id', checkToken, async (req, res) => {
+router.patch('/:id', Utils.checkToken, async (req, res) => {
     const id = req.params.id;
     const { name, avatar, job, github, linkedin, description } = req.body;
     const person = {
@@ -108,7 +94,7 @@ router.patch('/:id', checkToken, async (req, res) => {
     }
 });
 
-router.delete('/:id', checkToken, async (req, res) => {
+router.delete('/:id', Utils.checkToken, async (req, res) => {
     const id = req.params.id;
     try {
         const person = await Person.findOne({ _id: id });
